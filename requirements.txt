@@ -1,0 +1,10 @@
+PyYAML==3.12
+
+flask==0.12
+flask-restful==0.3.6
+
+docker==2.7.0
+
+uwsgi==2.0.15
+
+requests>=2.18
