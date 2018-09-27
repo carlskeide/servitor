@@ -1,61 +1,23 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
-import docker
-from docker.tls import TLSConfig
 from flask import request
 from flask_restful import Resource, abort
 
-import config
+from . import config
+from .docker import Swarm
 
 logger = logging.getLogger(__name__)
 
 
-def get_service_image(service):
-    return service.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Image"]
+def image_parts(image):
+    match = re.match(r'^(?P<name>.*?):(?P<tag>[^@:]+)(?:@[\w:]+)?$', image)
 
-
-class Swarm(object):
-    def __init__(self, key):
-        logger.debug(f"Initializing swarm: {key}")
-        try:
-            swarm = config.DOCKER_SWARMS[key]
-
-        except KeyError:
-            logger.warn(f"Invalid swarm: {key}")
-            abort(404)
-
-        kwargs = {}
-
-        tls_config = swarm.get("tls", False)
-        if tls_config:
-            kwargs["tls"] = TLSConfig(
-                client_cert=(tls_config["cert"], tls_config["key"]))
-
-        self.client = docker.DockerClient(base_url=swarm["url"], **kwargs)
-
-    def get_service(self, name):
-        # Service filters match substrings, this must return exactly one match.
-        services = self.client.services.list()
-        matches = [service for service in services if service.name == name]
-
-        if not len(matches):
-            abort(404)
-
-        else:
-            return matches[0]
-
-    def get_stack_services(self, name):
-        try:
-            targets = config.DOCKER_STACKS[name]
-
-        except KeyError:
-            abort(404)
-
-        services = self.client.services.list(filters={
-            "label": f"com.docker.stack.namespace={name}"
-        })
-        return [service for service in services if service.name in targets]
+    if not match:
+        raise ValueError('Unable to parse image spec')
+    else:
+        return match.groups()
 
 
 class TokenMixin(object):
@@ -75,10 +37,10 @@ class Service(Resource, TokenMixin):
         swarm = Swarm(env)
         service = swarm.get_service(name)
 
-        image = get_service_image(service)
-        return ({service.name: image}, 200)
+        image = swarm.get_service_image(service)
+        return (image, 200)
 
-    def post(self, env, name):
+    def put(self, env, name):
         logger.info(f"Updating service: {name}, env: {env}")
 
         image = request.args.get("image")
@@ -90,7 +52,7 @@ class Service(Resource, TokenMixin):
         service = swarm.get_service(name)
 
         service.update(image=image)
-        return ("ok", 200)
+        return (image, 200)
 
 
 class Stack(Resource, TokenMixin):
@@ -101,23 +63,36 @@ class Stack(Resource, TokenMixin):
         services = swarm.get_stack_services(name)
 
         images = {
-            service.name: get_service_image(service)
+            service.name: swarm.get_service_image(service)
             for service in services
         }
         return (images, 200)
 
-    def post(self, env, name):
+    def put(self, env, name):
         logger.info(f"Updating stack: {name}, env: {env}")
 
-        image = request.args.get("image")
-        if not image:
-            logger.warn("No image supplied")
+        image_spec = request.args.get("image")
+        try:
+            image, tag = image_parts(image_spec)
+
+        except Exception:
+            logger.warn(f"bad image spec: {image_spec}")
             abort(400)
 
         swarm = Swarm(env)
-        services = swarm.get_stack_services(name)
 
-        for service in services:
-            service.update(image=image)
+        matching_services = [
+            service for service in swarm.get_stack_services(name)
+            if image_parts(swarm.get_service_image(service))[0] == image
+        ]
 
-        return ("ok", 200)
+        if not len(matching_services):
+            logger.warn(f"No services of swarm: {name} matches: {image}")
+            abort(400)
+
+        result = {}
+        for service in matching_services:
+            service.update(image=image_spec)
+            result[service.name] = image_spec
+
+        return (result, 200)

@@ -5,8 +5,8 @@ import logging
 from flask import Flask
 from flask_restful import Api
 
-import config
-from resources import Service, Stack
+from . import config
+from .resources import Service, Stack
 
 logging.basicConfig(level=config.LOG_LEVEL)
 logger = logging.getLogger(__name__)

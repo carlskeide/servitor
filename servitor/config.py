@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from os import environ as env
 
 import yaml
@@ -12,16 +11,16 @@ LOG_LEVEL = env.get("LOG_LEVEL", "INFO").upper()
 
 # Secrets
 TOKEN = env.get("TOKEN")
+if not TOKEN:
+    raise Exception("Token must be set")
 
 # Services
-CONFIG_FILE = env.get("CONFIG_FILE", "/etc/servitor/config.yaml")
+CONFIG_FILE = env.get("CONFIG_FILE", "/conf/servitor.yaml")
 with open(CONFIG_FILE) as f:
     _service_config = yaml.load(f)
 
 try:
-    DOCKER_SWARMS = _service_config["swarms"]
-    DOCKER_STACKS = _service_config["stacks"]
+    DOCKER_SWARMS = _service_config["swarm"]
 
 except KeyError:
-    print("Invalid service config")
-    sys.exit(1)
+    raise Exception("Invalid service config")
