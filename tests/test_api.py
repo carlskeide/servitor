@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from . import TestCase, patch, TEST_TOKEN
+from werkzeug.exceptions import BadRequest
+
+from . import TestCase, MagicMock, patch, TEST_TOKEN
 
 
 class TestAPI(TestCase):
@@ -64,3 +66,88 @@ class TestAPI(TestCase):
                        headers=self.auth_headers)
         self.assertEqual(res.status_code, 200)
         mock_put.assert_called_with(env="some-swarm", name="some-stack")
+
+
+class TestResources(TestCase):
+    def setUp(self):
+        self.swarm = MagicMock()
+        self.patcher = patch('servitor.resources.Swarm')
+
+        mock_swarm = self.patcher.__enter__()
+        mock_swarm.return_value = self.swarm
+
+    def tearDown(self):
+        self.patcher.__exit__()
+
+    def test_get_service(self):
+        from servitor.resources import Service
+        resource = Service()
+
+        self.swarm.get_service_image.return_value = "some-image"
+        res, code = resource.get(env="some-swarm", name="some-service")
+
+        self.assertEqual(code, 200)
+        self.assertEqual(res, "some-image")
+
+    @patch("servitor.resources.request")
+    def test_put_service(self, mock_request):
+        from servitor.resources import Service
+        resource = Service()
+
+        mock_request.args.get.return_value = None
+        with self.assertRaises(BadRequest):
+            res, code = resource.put(env="some-swarm", name="some-ervice")
+
+        mock_service = MagicMock()
+        self.swarm.get_service.return_value = mock_service
+
+        mock_request.args.get.return_value = "some-image"
+        res, code = resource.put(env="some-swarm", name="some-service")
+
+        self.assertEqual(code, 200)
+        mock_service.update.assert_called_with(image="some-image")
+
+    def test_get_stack(self):
+        from servitor.resources import Stack
+        resource = Stack()
+
+        services = [MagicMock(), MagicMock()]
+        services[0].name = "service1"
+        services[1].name = "service2"
+        self.swarm.get_stack_services.return_value = services
+        self.swarm.get_service_image.side_effect = ["image1", "image2"]
+        res, code = resource.get(env="some-swarm", name="some-stack")
+
+        self.assertEqual(code, 200)
+        self.assertDictEqual(res, {"service1": "image1", "service2": "image2"})
+
+    @patch("servitor.resources.request")
+    def test_put_stack(self, mock_request):
+        from servitor.resources import Stack
+        resource = Stack()
+
+        mock_request.args.get.return_value = None
+        with self.assertRaises(BadRequest):
+            res, code = resource.put(env="some-swarm", name="some-stack")
+
+        mock_request.args.get.return_value = "some-image"
+        with self.assertRaises(BadRequest):
+            res, code = resource.put(env="some-swarm", name="some-stack")
+
+        mock_service = MagicMock()
+        self.swarm.get_stack_services.return_value = [mock_service]
+        self.swarm.get_service_image.return_value = "some-other-image:latest"
+
+        mock_request.args.get.return_value = "some-image:stable"
+
+        with self.assertRaises(BadRequest):
+            res, code = resource.put(env="some-swarm", name="some-stack")
+        mock_service.update.assert_not_called()
+
+        self.swarm.get_service_image.return_value = "some-image:latest"
+
+        mock_request.args.get.return_value = "some-image:stable"
+        res, code = resource.put(env="some-swarm", name="some-stack")
+
+        self.assertEqual(code, 200)
+        mock_service.update.assert_called_with(image="some-image:stable")
