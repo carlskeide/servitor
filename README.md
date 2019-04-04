@@ -1,5 +1,5 @@
 # Servitor
-__Tiny webhook for pushing image updates to docker stack services__
+__Tiny webhook for pushing image updates to docker swarm stacks/services__
 
 ## Configuration
 
