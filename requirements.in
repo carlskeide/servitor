@@ -1,0 +1,8 @@
+flask>=1.0,<1.1
+flask-restful>=0.3.6,<0.4
+
+requests>=2.20,<3.0
+PyYAML>=5.1,<5.2
+docker>=3.7,<3.8
+
+uwsgi>=2.0,<2.1
