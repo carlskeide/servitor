@@ -105,7 +105,7 @@ class TestResources(TestCase):
         res, code = resource.put(env="some-swarm", name="some-service")
 
         self.assertEqual(code, 200)
-        mock_service.update.assert_called_with(image="some-image")
+        self.swarm.force_update.assert_called_with(mock_service, "some-image")
 
     def test_get_stack(self):
         from servitor.resources import Stack
@@ -150,4 +150,5 @@ class TestResources(TestCase):
         res, code = resource.put(env="some-swarm", name="some-stack")
 
         self.assertEqual(code, 200)
-        mock_service.update.assert_called_with(image="some-image:stable")
+        self.swarm.force_update.assert_called_with(mock_service,
+                                                   "some-image:stable")

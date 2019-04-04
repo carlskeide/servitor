@@ -35,7 +35,7 @@ class Service(ProtectedsResource):
         swarm = Swarm(env)
         service = swarm.get_service(name)
 
-        service.update(image=image)
+        swarm.force_update(service, image)
         return (image, 200)
 
 
@@ -76,7 +76,7 @@ class Stack(ProtectedsResource):
 
         result = {}
         for service in matching_services:
-            service.update(image=image_spec)
+            swarm.force_update(service, image_spec)
             result[service.name] = image_spec
 
         return (result, 200)

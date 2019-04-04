@@ -68,3 +68,16 @@ class Swarm(object):
             Extract the image from a service object
         """
         return service.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Image"]
+
+    def force_update(self, service, image_spec):
+        """
+            Extract the image from a service object
+        """
+        if self.get_service_image(service) == image_spec:
+            logger.info(f"Pulling the latest version of: {image_spec}")
+            self.client.image.pull(image_spec)
+
+            service.force_update()
+
+        else:
+            service.update(image=image_spec)
