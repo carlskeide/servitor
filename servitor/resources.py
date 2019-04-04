@@ -1,36 +1,20 @@
 # -*- coding: utf-8 -*-
 import logging
-import re
 
 from flask import request
 from flask_restful import Resource, abort
 
-from . import settings
-from .docker import Swarm
+from .docker import Swarm, image_parts
+from .auth import token_auth
 
 logger = logging.getLogger(__name__)
 
 
-def image_parts(image):
-    match = re.match(r'^(?P<name>.*?):(?P<tag>[^@:]+)(?:@[\w:]+)?$', image)
-
-    if not match:
-        raise ValueError('Unable to parse image spec')
-    else:
-        return match.groups()
+class ProtectedsResource(Resource):
+    method_decorators = [token_auth.login_required]
 
 
-class TokenMixin(object):
-    def __init__(self):
-        super().__init__()
-
-        token = request.args.get("token", "")
-        if token != settings.TOKEN:
-            logger.warn(f"Invalid request token: {token!r}")
-            abort(403)
-
-
-class Service(Resource, TokenMixin):
+class Service(ProtectedsResource):
     def get(self, env, name):
         logger.info(f"Fetching service: {name}, env: {env}")
 
@@ -55,7 +39,7 @@ class Service(Resource, TokenMixin):
         return (image, 200)
 
 
-class Stack(Resource, TokenMixin):
+class Stack(ProtectedsResource):
     def get(self, env, name):
         logger.info(f"Fetching stack: {name}, env: {env}")
 

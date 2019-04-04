@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
 import docker
 from docker.tls import TLSConfig
@@ -8,6 +9,15 @@ from flask_restful import abort
 from . import settings
 
 logger = logging.getLogger(__name__)
+
+
+def image_parts(image):
+    match = re.match(r'^(?P<name>.*?):(?P<tag>[^@:]+)(?:@[\w:]+)?$', image)
+
+    if not match:
+        raise ValueError('Unable to parse image spec')
+    else:
+        return match.groups()
 
 
 class Swarm(object):

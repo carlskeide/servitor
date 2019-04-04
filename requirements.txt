@@ -10,6 +10,7 @@ chardet==3.0.4            # via requests
 click==7.0                # via flask
 docker-pycreds==0.4.0     # via docker
 docker==3.7.2
+flask-httpauth==3.2.4
 flask-restful==0.3.7
 flask==1.0.2
 idna==2.8                 # via requests
