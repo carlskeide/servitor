@@ -75,7 +75,7 @@ class Swarm(object):
         """
         if self.get_service_image(service) == image_spec:
             logger.info(f"Pulling the latest version of: {image_spec}")
-            self.client.image.pull(image_spec)
+            self.client.images.pull(image_spec)
 
             service.force_update()
 
