@@ -5,7 +5,7 @@ import re
 from flask import request
 from flask_restful import Resource, abort
 
-from . import config
+from . import settings
 from .docker import Swarm
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class TokenMixin(object):
         super().__init__()
 
         token = request.args.get("token", "")
-        if token != config.TOKEN:
+        if token != settings.TOKEN:
             logger.warn(f"Invalid request token: {token!r}")
             abort(403)
 

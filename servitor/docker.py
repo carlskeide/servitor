@@ -5,7 +5,7 @@ import docker
 from docker.tls import TLSConfig
 from flask_restful import abort
 
-from . import config
+from . import settings
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class Swarm(object):
     def __init__(self, key):
         logger.debug(f"Initializing swarm: {key}")
         try:
-            swarm = config.DOCKER_SWARMS[key]
+            swarm = settings.DOCKER_SWARMS[key]
 
         except KeyError:
             logger.warn(f"Invalid swarm: {key}")
