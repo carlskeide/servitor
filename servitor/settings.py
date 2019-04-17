@@ -24,7 +24,7 @@ CONFIG_FILE = env.get("CONFIG_FILE", "/servitor.yaml")
 
 try:
     with open(CONFIG_FILE) as f:
-        _service_config = yaml.load(f)
+        _service_config = yaml.safe_load(f)
 
     DOCKER_SWARMS = _service_config["swarm"]
 

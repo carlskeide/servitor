@@ -29,7 +29,7 @@ class Service(ProtectedsResource):
 
         image = request.args.get("image")
         if not image:
-            logger.warn("No image supplied")
+            logger.warning("No image supplied")
             abort(400)
 
         swarm = Swarm(env)
@@ -60,7 +60,7 @@ class Stack(ProtectedsResource):
             image, tag = image_parts(image_spec)
 
         except Exception:
-            logger.warn(f"bad image spec: {image_spec}")
+            logger.warning(f"bad image spec: {image_spec}")
             abort(400)
 
         swarm = Swarm(env)
@@ -71,7 +71,7 @@ class Stack(ProtectedsResource):
         ]
 
         if not len(matching_services):
-            logger.warn(f"No services of swarm: {name} matches: {image}")
+            logger.warning(f"No services of swarm: {name} matches: {image}")
             abort(400)
 
         result = {}

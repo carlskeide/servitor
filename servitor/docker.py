@@ -27,7 +27,7 @@ class Swarm(object):
             swarm = settings.DOCKER_SWARMS[key]
 
         except KeyError:
-            logger.warn(f"Invalid swarm: {key}")
+            logger.warning(f"Invalid swarm: {key}")
             abort(404)
 
         kwargs = {}
