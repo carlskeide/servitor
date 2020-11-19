@@ -1,3 +1,5 @@
+![Python Package](https://github.com/carlskeide/servitor/workflows/Docker%20build/badge.svg)
+
 # Servitor
 __Tiny webhook for pushing image updates to docker swarm stacks/services__
 
