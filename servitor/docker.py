@@ -34,9 +34,9 @@ class Swarm(object):
 
         tls_config = swarm.get("tls", False)
         if tls_config:
-            kwargs["tls"] = TLSConfig(
-                ca_cert=tls_config["cacert"],
-                client_cert=(tls_config["cert"], tls_config["key"]))
+            kwargs["tls"] = TLSConfig(ca_cert=tls_config["ca_cert"],
+                                      client_cert=(tls_config["client_cert"],
+                                                   tls_config["client_key"]))
 
         self.client = docker.DockerClient(base_url=swarm["url"], **kwargs)
 

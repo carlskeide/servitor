@@ -23,7 +23,7 @@ swarm:
   some-tls-swarm:
     url: "tls-swarm-addr:2376"
     tls:
-        ca: /etc/servitor/tls-ca.pem
-        cert: /etc/servitor/tls-swarm.pem
-        key: /etc/servitor/tls-swarm.pem
+        ca_cert: /etc/servitor/tls-ca.pem
+        client_cert: /etc/servitor/tls-swarm.pem
+        client_key: /etc/servitor/tls-swarm.pem
 ```
