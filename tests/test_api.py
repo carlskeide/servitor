@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+from unittest import TestCase, skip
+from unittest.mock import Mock, patch
+
 from werkzeug.exceptions import BadRequest
 
-from . import TestCase, MagicMock, patch, TEST_TOKEN
+from . import TEST_TOKEN
 
 
 class TestAPI(TestCase):
@@ -70,7 +73,7 @@ class TestAPI(TestCase):
 
 class TestResources(TestCase):
     def setUp(self):
-        self.swarm = MagicMock()
+        self.swarm = Mock()
         self.patcher = patch('servitor.resources.Swarm')
 
         mock_swarm = self.patcher.__enter__()
@@ -98,7 +101,7 @@ class TestResources(TestCase):
         with self.assertRaises(BadRequest):
             res, code = resource.put(env="some-swarm", name="some-ervice")
 
-        mock_service = MagicMock()
+        mock_service = Mock()
         self.swarm.get_service.return_value = mock_service
 
         mock_request.args.get.return_value = "some-image"
@@ -111,7 +114,7 @@ class TestResources(TestCase):
         from servitor.resources import Stack
         resource = Stack()
 
-        services = [MagicMock(), MagicMock()]
+        services = [Mock(), Mock()]
         services[0].name = "service1"
         services[1].name = "service2"
         self.swarm.get_stack_services.return_value = services
@@ -134,7 +137,7 @@ class TestResources(TestCase):
         with self.assertRaises(BadRequest):
             res, code = resource.put(env="some-swarm", name="some-stack")
 
-        mock_service = MagicMock()
+        mock_service = Mock()
         self.swarm.get_stack_services.return_value = [mock_service]
         self.swarm.get_service_image.return_value = "some-other-image:latest"
 
