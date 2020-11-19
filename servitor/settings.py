@@ -11,10 +11,10 @@ DEBUG = False
 ERROR_404_HELP = False
 
 # App config
-LOG_LEVEL = sec.load("LOG_LEVEL",  fallback="INFO").upper()
+LOG_LEVEL = sec.load("LOG_LEVEL", fallback="INFO").upper()
 
 # Secrets
-TOKEN = sec.load("AUTH_TOKEN", fallback= "")
+TOKEN = sec.load("AUTH_TOKEN", fallback="")
 if not TOKEN:
     logger.error("Auth token must be set")
     sys.exit(1)
