@@ -5,10 +5,10 @@ __Tiny webhook for pushing image updates to docker swarm stacks/services__
 
 ### Environment
 *Required*
-* `TOKEN` - authentication secret
+* `AUTH_TOKEN` - API access token
 
 *Optional*
-* `CONFIG_FILE` - default: "/etc/servitor/config.yaml"
+* `CONFIG_FILE` - default: "/servitor.yaml"
 * `LOG_LEVEL` - default: INFO
 
 ### Config File Format
@@ -21,6 +21,7 @@ swarm:
   some-tls-swarm:
     url: "tls-swarm-addr:2376"
     tls:
-        cert: /etc/servitor/tls-swarm.crt
+        ca: /etc/servitor/tls-ca.pem
+        cert: /etc/servitor/tls-swarm.pem
         key: /etc/servitor/tls-swarm.pem
 ```

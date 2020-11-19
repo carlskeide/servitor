@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from os import environ as env
 import logging
 import sys
 
 import yaml
+import sec
 
 logger = logging.getLogger(__name__)
 
@@ -11,16 +11,16 @@ DEBUG = False
 ERROR_404_HELP = False
 
 # App config
-LOG_LEVEL = env.get("LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = sec.load("LOG_LEVEL",  fallback="INFO").upper()
 
 # Secrets
-TOKEN = env.get("TOKEN", "")
+TOKEN = sec.load("AUTH_TOKEN", fallback= "")
 if not TOKEN:
     logger.error("Auth token must be set")
     sys.exit(1)
 
 # Swarm config
-CONFIG_FILE = env.get("CONFIG_FILE", "/servitor.yaml")
+CONFIG_FILE = sec.load("CONFIG_FILE", fallback="/servitor.yaml")
 
 try:
     with open(CONFIG_FILE) as f:
