@@ -5,6 +5,6 @@ flask-restful >= 0.3, <0.4
 Flask-httpauth >= 3.2, <3.3
 
 requests >= 2.20, <3.0
-PyYAML >= 5.1, <5.2
+PyYAML >= 5.1, < 5.5
 docker[tls] >= 3.7, <4.0
 sec >= 0.3, <0.4
